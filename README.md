@@ -81,17 +81,6 @@ Uygulama SDCA (Stochastic Dual Coordinate Ascent) algoritması kullanır ve aşa
 
 Bu proje, makine öğrenmesi ve C# becerilerini göstermek için geliştirilmiştir. Otomotiv sektöründe müşteri segmentasyonu için pratik bir örnek sunar.
 
-## 🤝 Katkıda Bulunma
-
-1. Fork yapın
-2. Feature branch oluşturun (`git checkout -b feature/AmazingFeature`)
-3. Commit yapın (`git commit -m 'Add some AmazingFeature'`)
-4. Branch'i push edin (`git push origin feature/AmazingFeature`)
-5. Pull Request açın
-
-## 📄 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
 
 ---
 
