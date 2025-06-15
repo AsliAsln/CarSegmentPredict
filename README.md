@@ -1,149 +1,87 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Segment Predictor</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-            background: #f8f9fa;
-        }
-        
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-        
-        h2 {
-            color: #34495e;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        
-        .tech-stack {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin: 15px 0;
-        }
-        
-        .tech-badge {
-            background: #3498db;
-            color: white;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.85em;
-        }
-        
-        .screenshot {
-            width: 100%;
-            max-width: 600px;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin: 20px 0;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Consolas', monospace;
-        }
-        
-        ul, ol {
-            padding-left: 20px;
-        }
-        
-        li {
-            margin: 8px 0;
-        }
-        
-        .highlight {
-            background: #e8f4f8;
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 4px solid #3498db;
-            margin: 15px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🚗 Car Segment Predictor</h1>
-        
-        <p>Müşteri verilerine dayalı araba segment tahmini yapan C# uygulaması. ML.NET kullanarak müşterilerin demografik bilgilerinden hangi araba segmentini tercih edeceklerini tahmin eder.</p>
-        
-        <img src="https://i.imgur.com/6UJoGLK.png" alt="Car Segment Predictor Application" class="screenshot">
-        
-        <h2>🛠️ Teknolojiler</h2>
-        <div class="tech-stack">
-            <span class="tech-badge">C#</span>
-            <span class="tech-badge">ML.NET</span>
-            <span class="tech-badge">Windows Forms</span>
-            <span class="tech-badge">.NET Framework</span>
-        </div>
-        
-        <h2>⚡ Özellikler</h2>
-        <ul>
-            <li>Makine öğrenmesi ile segment tahmini</li>
-            <li>Kullanıcı dostu Windows Forms arayüzü</li>
-            <li>CSV verisi ile model eğitimi</li>
-            <li>Gerçek zamanlı tahmin sonuçları</li>
-            <li>Model performans metrikleri</li>
-        </ul>
-        
-        <h2>📥 Kurulum</h2>
-        <ol>
-            <li>Projeyi klonlayın: <code>git clone https://github.com/AsliAsln/CarSegmentPredict</code></li>
-            <li>Visual Studio ile açın</li>
-            <li>NuGet paketlerini yükleyin</li>
-            <li>Veri dosyasını hazırlayın</li>
-            <li>Çalıştırın</li>
-        </ol>
-        
-        <h2>📊 Veri Formatı</h2>
-        <div class="highlight">
-            <strong>CSV dosyası şu sütunları içermelidir:</strong><br>
-            ID, Gender, Married, Age, Graduated, Profession, WorkExperience, SpendingScore, FamilySize, Category, Segmentation
-        </div>
-        
-        <h2>🚀 Kullanım</h2>
-        <ol>
-            <li><strong>Train Model:</strong> Modeli eğitin</li>
-            <li><strong>Müşteri bilgilerini girin:</strong> Yaş, meslek, gelir vb.</li>
-            <li><strong>Predict Segment:</strong> Segment tahminini alın</li>
-        </ol>
-        
-        <h2>🎯 Segment Kategorileri</h2>
-        <ul>
-            <li><strong>A:</strong> Premium segment</li>
-            <li><strong>B:</strong> Orta-üst segment</li>
-            <li><strong>C:</strong> Orta segment</li>
-            <li><strong>D:</strong> Ekonomik segment</li>
-        </ul>
-        
-        <h2>📝 Not</h2>
-        <p>Bu proje, makine öğrenmesi ve C# becerilerini göstermek için geliştirilmiştir. Otomotiv sektöründe müşteri segmentasyonu için pratik bir örnek sunar.</p>
-    </div>
-</body>
-</html>
+# 🚗 Car Segment Predictor
+
+Müşteri verilerine dayalı araba segment tahmini yapan C# uygulaması. ML.NET kullanarak müşterilerin demografik bilgilerinden hangi araba segmentini tercih edeceklerini tahmin eder.
+
+![Car Segment Predictor Application](https://i.imgur.com/6UJoGLK.png)
+
+## 🛠️ Teknolojiler
+
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=c-sharp&logoColor=white)
+![ML.NET](https://img.shields.io/badge/ML.NET-512BD4?style=for-the-badge&logo=.net&logoColor=white)
+![Windows Forms](https://img.shields.io/badge/Windows%20Forms-0078D4?style=for-the-badge&logo=windows&logoColor=white)
+![.NET Framework](https://img.shields.io/badge/.NET%20Framework-512BD4?style=for-the-badge&logo=.net&logoColor=white)
+
+## ⚡ Özellikler
+
+- 🤖 **Makine Öğrenmesi**: ML.NET ile güçlü tahmin modeli
+- 🖥️ **Kullanıcı Dostu Arayüz**: Windows Forms ile basit kullanım
+- 📊 **CSV Veri Desteği**: Kendi verilerinizle model eğitimi
+- ⚡ **Gerçek Zamanlı Tahmin**: Anında sonuç alma
+- 📈 **Performans Metrikleri**: Model doğruluğu görüntüleme
+
+## 📥 Kurulum
+
+```bash
+# Projeyi klonlayın
+git clone https://github.com/AsliAsln/CarSegmentPredict
+
+# Visual Studio ile açın
+# NuGet paketleri otomatik yüklenecek
+
+# Veri dosyasını hazırlayın (CSV formatında)
+# Uygulamayı derleyip çalıştırın
+```
+
+## 📊 Veri Formatı
+
+CSV dosyanız şu sütunları içermeli:
+
+| Sütun | Tip | Örnek Değerler |
+|-------|-----|----------------|
+| ID | Integer | 1, 2, 3... |
+| Gender | String | Male, Female |
+| Married | String | Yes, No |
+| Age | Integer | 18-80 |
+| Graduated | String | Yes, No |
+| Profession | String | Healthcare, Engineer, Lawyer |
+| WorkExperience | Integer | 0-50 |
+| SpendingScore | String | Low, Average, High |
+| FamilySize | Integer | 1-10 |
+| Category | String | Customer category |
+| Segmentation | String | A, B, C, D |
+
+## 🚀 Kullanım
+
+1. **Model Eğitimi**: "Train Model" butonuna tıklayarak modeli eğitin
+2. **Veri Girişi**: Müşteri bilgilerini forma girin
+3. **Tahmin**: "Predict Segment" ile segment tahminini alın
+4. **Sonuç**: Tahmin edilen segment ve güven skorunu görün
+
+## 🎯 Segment Kategorileri
+
+- **Segment A**: Premium müşteriler (Lüks araçlar)
+- **Segment B**: Orta-üst segment (Konfor odaklı)
+- **Segment C**: Orta segment (Dengeli seçim)
+- **Segment D**: Ekonomik segment (Bütçe dostu)
+
+## 📈 Model Performansı
+
+Uygulama SDCA (Stochastic Dual Coordinate Ascent) algoritması kullanır ve aşağıdaki metrikleri sağlar:
+- Model doğruluğu
+- Confusion matrix
+- Precision ve Recall değerleri
+
+## 🔧 Gereksinimler
+
+- Visual Studio 2019 veya üzeri
+- .NET Framework 4.7.2+
+- ML.NET NuGet paketi
+
+## 📝 Notlar
+
+Bu proje, makine öğrenmesi ve C# becerilerini göstermek için geliştirilmiştir. Otomotiv sektöründe müşteri segmentasyonu için pratik bir örnek sunar.
+
+
+---
+
+⭐ Bu projeyi beğendiyseniz yıldız vermeyi unutmayın!
