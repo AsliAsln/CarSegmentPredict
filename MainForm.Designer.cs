@@ -1,5 +1,6 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
+using Microsoft.ML.Transforms;
 using System;
 using System.Data;
 using System.Drawing;
@@ -143,6 +144,23 @@ namespace CarSegmentPredict
 
         private void LoadDefaultValues()
         {
+            // Add "Unknown" options to handle missing data
+            cmbGender.Items.Clear();
+            cmbGender.Items.AddRange(new[] { "Male", "Female", "Unknown" });
+
+            cmbMarried.Items.Clear();
+            cmbMarried.Items.AddRange(new[] { "Yes", "No", "Unknown" });
+
+            cmbGraduated.Items.Clear();
+            cmbGraduated.Items.AddRange(new[] { "Yes", "No", "Unknown" });
+
+            cmbProfession.Items.Clear();
+            cmbProfession.Items.AddRange(new[] { "Healthcare", "Engineer", "Lawyer", "Artist", "Doctor", "Homemaker", "Entertainment", "Marketing", "Executive", "Unknown" });
+
+            cmbSpendingScore.Items.Clear();
+            cmbSpendingScore.Items.AddRange(new[] { "Low", "Average", "High" });
+
+            // Set default selections
             cmbGender.SelectedIndex = 0;
             cmbMarried.SelectedIndex = 0;
             cmbGraduated.SelectedIndex = 0;
@@ -156,7 +174,7 @@ namespace CarSegmentPredict
 
             if (!File.Exists(dataPath))
             {
-                MessageBox.Show($"Training data file '{dataPath}' not found. Please ensure the file is in the application directory.",
+                MessageBox.Show($"Training data file '{dataPath}' not found. .",
                     "File Not Found", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -187,69 +205,113 @@ namespace CarSegmentPredict
 
         private void TrainModel(string dataPath)
         {
-            // Load data
-            IDataView dataView = _mlContext.Data.LoadFromTextFile<CarSegmentData>(
-            path: dataPath,
-            hasHeader: true,
-            separatorChar: ',');
+                // Load data
+                IDataView dataView = _mlContext.Data.LoadFromTextFile<CarSegmentData>(
+             path: dataPath,
+             hasHeader: true,
+             separatorChar: ',',
+             allowQuoting: true,
+             allowSparse: true);
 
-            // Split data
-            var dataSplit = _mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
+             
+                var cleanedData = _mlContext.Data.CreateEnumerable<CarSegmentData>(dataView, reuseRowObject: false)
+                    .Select(row => new CarSegmentData
+                    {
+                        ID = row.ID,
+                        Gender = string.IsNullOrWhiteSpace(row.Gender) ? "Unknown" : row.Gender,
+                        Married = string.IsNullOrWhiteSpace(row.Married) ? "Unknown" : row.Married,
+                        Age = float.IsNaN(row.Age) ? 30f : row.Age, // Default age if missing
+                        Graduated = string.IsNullOrWhiteSpace(row.Graduated) ? "Unknown" : row.Graduated,
+                        Profession = string.IsNullOrWhiteSpace(row.Profession) ? "Unknown" : row.Profession,
+                        WorkExperience = float.IsNaN(row.WorkExperience) ? 0f : row.WorkExperience,
+                        SpendingScore = string.IsNullOrWhiteSpace(row.SpendingScore) ? "Average" : row.SpendingScore,
+                        FamilySize = float.IsNaN(row.FamilySize) ? 1f : row.FamilySize,
+                        Category = row.Category,
+                        Segmentation = row.Segmentation
+                    })
+                    .Where(row => !string.IsNullOrWhiteSpace(row.Segmentation)); 
 
-            // Create pipeline
-            var pipeline = _mlContext.Transforms.Categorical.OneHotEncoding(
-                    outputColumnName: "GenderEncoded",
-                    inputColumnName: nameof(CarSegmentData.Gender))
-                .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
-                    outputColumnName: "MarriedEncoded",
-                    inputColumnName: nameof(CarSegmentData.Married)))
-                .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
-                    outputColumnName: "GraduatedEncoded",
-                    inputColumnName: nameof(CarSegmentData.Graduated)))
-                .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
-                    outputColumnName: "ProfessionEncoded",
-                    inputColumnName: nameof(CarSegmentData.Profession)))
-                .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
-                    outputColumnName: "SpendingScoreEncoded",
-                    inputColumnName: nameof(CarSegmentData.SpendingScore)))
-                .Append(_mlContext.Transforms.Concatenate("Features",
-                    "GenderEncoded", "MarriedEncoded", nameof(CarSegmentData.Age),
-                    "GraduatedEncoded", "ProfessionEncoded", nameof(CarSegmentData.WorkExperience),
-                    "SpendingScoreEncoded", nameof(CarSegmentData.FamilySize)))
-                .Append(_mlContext.Transforms.Conversion.MapValueToKey(
-                    outputColumnName: "Label",
-                    inputColumnName: nameof(CarSegmentData.Segmentation)))
-                .Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy(
-                    labelColumnName: "Label",
-                    featureColumnName: "Features"))
-                .Append(_mlContext.Transforms.Conversion.MapKeyToValue(
-                    outputColumnName: "PredictedLabel",
-                    inputColumnName: "PredictedLabel"));
+                dataView = _mlContext.Data.LoadFromEnumerable(cleanedData);
 
-            // Train model
-            //print row count
-            long a = dataSplit.TrainSet.GetRowCount() ?? 0;
-          
-            _trainedModel = pipeline.Fit(dataSplit.TrainSet);
+                var rowCount = dataView.GetRowCount() ?? 0;
+                this.Invoke(new Action(() =>
+                {
+                    txtModelStatus.Text += $"\r\nLoaded {rowCount} rows from training data.";
+                }));
 
-            // Evaluate model
-            var predictions = _trainedModel.Transform(dataSplit.TestSet);
-            var metrics = _mlContext.MulticlassClassification.Evaluate(predictions, "Label");
+                
+                var dataSplit = _mlContext.Data.TrainTestSplit(dataView, testFraction: 0.2);
 
-            // Update UI with metrics
-            this.Invoke(new Action(() =>
-            {
-                txtModelStatus.Text += $"\r\n\r\nModel Quality Metrics:\r\n";
-                txtModelStatus.Text += $"Accuracy: {metrics.MacroAccuracy:P2}\r\n";
-                txtModelStatus.Text += $"Log Loss: {metrics.LogLoss:F2}";
-            }));
+                var pipeline = _mlContext.Transforms.Categorical.OneHotEncoding(
+                        outputColumnName: "GenderEncoded",
+                        inputColumnName: nameof(CarSegmentData.Gender))
+                    .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
+                        outputColumnName: "MarriedEncoded",
+                        inputColumnName: nameof(CarSegmentData.Married)))
+                    .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
+                        outputColumnName: "GraduatedEncoded",
+                        inputColumnName: nameof(CarSegmentData.Graduated)))
+                    .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
+                        outputColumnName: "ProfessionEncoded",
+                        inputColumnName: nameof(CarSegmentData.Profession)))
+                    .Append(_mlContext.Transforms.Categorical.OneHotEncoding(
+                        outputColumnName: "SpendingScoreEncoded",
+                        inputColumnName: nameof(CarSegmentData.SpendingScore)))
+                    .Append(_mlContext.Transforms.ReplaceMissingValues(
+                        outputColumnName: nameof(CarSegmentData.Age),
+                        inputColumnName: nameof(CarSegmentData.Age),
+                        replacementMode: Microsoft.ML.Transforms.MissingValueReplacingEstimator.ReplacementMode.Mean))
+                    .Append(_mlContext.Transforms.ReplaceMissingValues(
+                        outputColumnName: nameof(CarSegmentData.WorkExperience),
+                        inputColumnName: nameof(CarSegmentData.WorkExperience),
+                        replacementMode: Microsoft.ML.Transforms.MissingValueReplacingEstimator.ReplacementMode.Mean))
+                    .Append(_mlContext.Transforms.ReplaceMissingValues(
+                        outputColumnName: nameof(CarSegmentData.FamilySize),
+                        inputColumnName: nameof(CarSegmentData.FamilySize),
+                        replacementMode: Microsoft.ML.Transforms.MissingValueReplacingEstimator.ReplacementMode.Mean))
+                    .Append(_mlContext.Transforms.Concatenate("Features",
+                        "GenderEncoded", "MarriedEncoded", nameof(CarSegmentData.Age),
+                        "GraduatedEncoded", "ProfessionEncoded", nameof(CarSegmentData.WorkExperience),
+                        "SpendingScoreEncoded", nameof(CarSegmentData.FamilySize)))
+                    .Append(_mlContext.Transforms.Conversion.MapValueToKey(
+                        outputColumnName: "Label",
+                        inputColumnName: nameof(CarSegmentData.Segmentation)))
+                    .Append(_mlContext.MulticlassClassification.Trainers.SdcaMaximumEntropy(
+                        labelColumnName: "Label",
+                        featureColumnName: "Features"))
+                    .Append(_mlContext.Transforms.Conversion.MapKeyToValue(
+                        outputColumnName: "PredictedLabel",
+                        inputColumnName: "PredictedLabel"));
 
-            // Create prediction engine
-            _predictionEngine = _mlContext.Model.CreatePredictionEngine<CarSegmentInput, CarSegmentPrediction>(_trainedModel);
+                // Train model
+                long trainRowCount = dataSplit.TrainSet.GetRowCount() ?? 0;
+                this.Invoke(new Action(() =>
+                {
+                    txtModelStatus.Text += $"\r\nTraining with {trainRowCount} rows...";
+                }));
 
-            // Save model
-            string modelPath = "car_segment_model.zip";
-            _mlContext.Model.Save(_trainedModel, null, modelPath);
+                _trainedModel = pipeline.Fit(dataSplit.TrainSet);
+
+                // Evaluate model
+                var predictions = _trainedModel.Transform(dataSplit.TestSet);
+                var metrics = _mlContext.MulticlassClassification.Evaluate(predictions, "Label");
+
+                // Update UI
+                this.Invoke(new Action(() =>
+                {
+                    txtModelStatus.Text += $"\r\n\r\nModel Quality Metrics:\r\n";
+                    txtModelStatus.Text += $"Accuracy: {metrics.MacroAccuracy:P2}\r\n";
+                    txtModelStatus.Text += $"Log Loss: {metrics.LogLoss:F2}";
+                }));
+
+                _predictionEngine = _mlContext.Model.CreatePredictionEngine<CarSegmentInput, CarSegmentPrediction>(
+                    _trainedModel,
+                    ignoreMissingColumns: true);
+
+                string modelPath = "car_segment_model.zip";
+                _mlContext.Model.Save(_trainedModel, dataView.Schema, modelPath);
+            
+           
         }
 
         private void BtnPredict_Click(object sender, EventArgs e)
@@ -264,13 +326,13 @@ namespace CarSegmentPredict
             {
                 var input = new CarSegmentInput
                 {
-                    Gender = cmbGender.SelectedItem?.ToString(),
-                    Married = cmbMarried.SelectedItem?.ToString(),
+                    Gender = string.IsNullOrWhiteSpace(cmbGender.SelectedItem?.ToString()) ? "Unknown" : cmbGender.SelectedItem.ToString(),
+                    Married = string.IsNullOrWhiteSpace(cmbMarried.SelectedItem?.ToString()) ? "Unknown" : cmbMarried.SelectedItem.ToString(),
                     Age = (float)nudAge.Value,
-                    Graduated = cmbGraduated.SelectedItem?.ToString(),
-                    Profession = cmbProfession.SelectedItem?.ToString(),
+                    Graduated = string.IsNullOrWhiteSpace(cmbGraduated.SelectedItem?.ToString()) ? "Unknown" : cmbGraduated.SelectedItem.ToString(),
+                    Profession = string.IsNullOrWhiteSpace(cmbProfession.SelectedItem?.ToString()) ? "Unknown" : cmbProfession.SelectedItem.ToString(),
                     WorkExperience = (float)nudWorkExperience.Value,
-                    SpendingScore = cmbSpendingScore.SelectedItem?.ToString(),
+                    SpendingScore = string.IsNullOrWhiteSpace(cmbSpendingScore.SelectedItem?.ToString()) ? "Average" : cmbSpendingScore.SelectedItem.ToString(),
                     FamilySize = (float)nudFamilySize.Value
                 };
 
